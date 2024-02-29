@@ -39,14 +39,14 @@
      </property>
      <widget class="QSplitter" name="splitter_left">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
         <horstretch>2</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
       <property name="minimumSize">
        <size>
-        <width>300</width>
+        <width>200</width>
         <height>0</height>
        </size>
       </property>
@@ -113,7 +113,7 @@
            </spacer>
           </item>
           <item row="0" column="1">
-           <widget class="QPushButton" name="file_dialog_btn">
+           <widget class="QPushButton" name="ui_file_dialog_btn">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -150,7 +150,7 @@
            </widget>
           </item>
           <item row="0" column="0" rowspan="2">
-           <widget class="QPlainTextEdit" name="file_path">
+           <widget class="QPlainTextEdit" name="ui_file_path">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -175,7 +175,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QTreeWidget" name="file_content">
+      <widget class="QTreeWidget" name="ui_file_content">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>
@@ -200,7 +200,7 @@
         </property>
        </column>
       </widget>
-      <widget class="QTableWidget" name="property_list">
+      <widget class="QTableWidget" name="ui_property_list">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -264,7 +264,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="start_index"/>
+             <widget class="QSpinBox" name="ui_start_index"/>
             </item>
            </layout>
           </item>
@@ -281,7 +281,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="samples"/>
+             <widget class="QSpinBox" name="ui_samples"/>
             </item>
            </layout>
           </item>
@@ -301,7 +301,7 @@
              </spacer>
             </item>
             <item>
-             <widget class="QCheckBox" name="is_all_samples">
+             <widget class="QCheckBox" name="ui_is_all_samples">
               <property name="text">
                <string>所有点</string>
               </property>
@@ -336,7 +336,7 @@
       <property name="childrenCollapsible">
        <bool>false</bool>
       </property>
-      <widget class="QGraphicsView" name="wave_graph">
+      <widget class="QGraphicsView" name="ui_wave_graph">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -350,7 +350,7 @@
         </size>
        </property>
       </widget>
-      <widget class="QListView" name="data_list">
+      <widget class="QListView" name="ui_data_list">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
