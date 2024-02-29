@@ -8,6 +8,7 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
+from PySide6.QtCharts import QChartView
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
@@ -15,11 +16,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QCheckBox, QGraphicsView, QGridLayout,
-    QHBoxLayout, QHeaderView, QLabel, QListView,
-    QPlainTextEdit, QPushButton, QSizePolicy, QSpacerItem,
-    QSpinBox, QSplitter, QTableWidget, QTableWidgetItem,
-    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout,
+    QHeaderView, QLabel, QPlainTextEdit, QPushButton,
+    QSizePolicy, QSpacerItem, QSpinBox, QSplitter,
+    QTableWidget, QTableWidgetItem, QTreeWidget, QTreeWidgetItem,
+    QVBoxLayout, QWidget)
 import ui.resource_rc
 
 class Ui_TDMSViewer(object):
@@ -42,7 +43,7 @@ class Ui_TDMSViewer(object):
         self.splitter_all.setChildrenCollapsible(False)
         self.splitter_left = QSplitter(self.splitter_all)
         self.splitter_left.setObjectName(u"splitter_left")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
         sizePolicy1.setHorizontalStretch(2)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.splitter_left.sizePolicy().hasHeightForWidth())
@@ -202,22 +203,19 @@ class Ui_TDMSViewer(object):
         self.splitter_right.setOrientation(Qt.Vertical)
         self.splitter_right.setHandleWidth(2)
         self.splitter_right.setChildrenCollapsible(False)
-        self.ui_wave_graph = QGraphicsView(self.splitter_right)
-        self.ui_wave_graph.setObjectName(u"ui_wave_graph")
-        sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy9.setHorizontalStretch(0)
-        sizePolicy9.setVerticalStretch(6)
-        sizePolicy9.setHeightForWidth(self.ui_wave_graph.sizePolicy().hasHeightForWidth())
-        self.ui_wave_graph.setSizePolicy(sizePolicy9)
-        self.ui_wave_graph.setMinimumSize(QSize(0, 0))
-        self.splitter_right.addWidget(self.ui_wave_graph)
-        self.ui_data_list = QListView(self.splitter_right)
+        self.ui_graph = QChartView(self.splitter_right)
+        self.ui_graph.setObjectName(u"ui_graph")
+        sizePolicy5.setHeightForWidth(self.ui_graph.sizePolicy().hasHeightForWidth())
+        self.ui_graph.setSizePolicy(sizePolicy5)
+        self.ui_graph.setMinimumSize(QSize(0, 0))
+        self.splitter_right.addWidget(self.ui_graph)
+        self.ui_data_list = QTableWidget(self.splitter_right)
         self.ui_data_list.setObjectName(u"ui_data_list")
-        sizePolicy10 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy10.setHorizontalStretch(0)
-        sizePolicy10.setVerticalStretch(4)
-        sizePolicy10.setHeightForWidth(self.ui_data_list.sizePolicy().hasHeightForWidth())
-        self.ui_data_list.setSizePolicy(sizePolicy10)
+        sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy9.setHorizontalStretch(0)
+        sizePolicy9.setVerticalStretch(4)
+        sizePolicy9.setHeightForWidth(self.ui_data_list.sizePolicy().hasHeightForWidth())
+        self.ui_data_list.setSizePolicy(sizePolicy9)
         self.ui_data_list.setMinimumSize(QSize(0, 0))
         self.splitter_right.addWidget(self.ui_data_list)
         self.splitter_all.addWidget(self.splitter_right)
