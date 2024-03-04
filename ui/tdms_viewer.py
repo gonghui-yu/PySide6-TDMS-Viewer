@@ -18,9 +18,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout,
     QHeaderView, QLabel, QPlainTextEdit, QPushButton,
-    QSizePolicy, QSpacerItem, QSpinBox, QSplitter,
-    QTableView, QTableWidget, QTableWidgetItem, QTreeWidget,
-    QTreeWidgetItem, QVBoxLayout, QWidget)
+    QScrollBar, QSizePolicy, QSpacerItem, QSpinBox,
+    QSplitter, QTableView, QTableWidget, QTableWidgetItem,
+    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 import ui.resource_rc
 
 class Ui_TDMSViewer(object):
@@ -34,8 +34,8 @@ class Ui_TDMSViewer(object):
         sizePolicy.setHeightForWidth(TDMSViewer.sizePolicy().hasHeightForWidth())
         TDMSViewer.setSizePolicy(sizePolicy)
         TDMSViewer.setMinimumSize(QSize(1366, 768))
-        self.gridLayout_4 = QGridLayout(TDMSViewer)
-        self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.gridLayout_5 = QGridLayout(TDMSViewer)
+        self.gridLayout_5.setObjectName(u"gridLayout_5")
         self.splitter_all = QSplitter(TDMSViewer)
         self.splitter_all.setObjectName(u"splitter_all")
         self.splitter_all.setOrientation(Qt.Horizontal)
@@ -44,7 +44,7 @@ class Ui_TDMSViewer(object):
         self.splitter_left = QSplitter(self.splitter_all)
         self.splitter_left.setObjectName(u"splitter_left")
         sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        sizePolicy1.setHorizontalStretch(3)
+        sizePolicy1.setHorizontalStretch(2)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.splitter_left.sizePolicy().hasHeightForWidth())
         self.splitter_left.setSizePolicy(sizePolicy1)
@@ -195,7 +195,7 @@ class Ui_TDMSViewer(object):
         self.splitter_right = QSplitter(self.splitter_all)
         self.splitter_right.setObjectName(u"splitter_right")
         sizePolicy8 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
-        sizePolicy8.setHorizontalStretch(7)
+        sizePolicy8.setHorizontalStretch(8)
         sizePolicy8.setVerticalStretch(0)
         sizePolicy8.setHeightForWidth(self.splitter_right.sizePolicy().hasHeightForWidth())
         self.splitter_right.setSizePolicy(sizePolicy8)
@@ -209,7 +209,14 @@ class Ui_TDMSViewer(object):
         self.ui_graph.setSizePolicy(sizePolicy5)
         self.ui_graph.setMinimumSize(QSize(0, 0))
         self.splitter_right.addWidget(self.ui_graph)
-        self.ui_data_list = QTableView(self.splitter_right)
+        self.widget_3 = QWidget(self.splitter_right)
+        self.widget_3.setObjectName(u"widget_3")
+        self.gridLayout_4 = QGridLayout(self.widget_3)
+        self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.ui_data_list = QTableView(self.widget_3)
         self.ui_data_list.setObjectName(u"ui_data_list")
         sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         sizePolicy9.setHorizontalStretch(0)
@@ -217,10 +224,22 @@ class Ui_TDMSViewer(object):
         sizePolicy9.setHeightForWidth(self.ui_data_list.sizePolicy().hasHeightForWidth())
         self.ui_data_list.setSizePolicy(sizePolicy9)
         self.ui_data_list.setMinimumSize(QSize(0, 0))
-        self.splitter_right.addWidget(self.ui_data_list)
+
+        self.horizontalLayout_2.addWidget(self.ui_data_list)
+
+        self.ui_data_list_scroll_bar = QScrollBar(self.widget_3)
+        self.ui_data_list_scroll_bar.setObjectName(u"ui_data_list_scroll_bar")
+        self.ui_data_list_scroll_bar.setOrientation(Qt.Vertical)
+
+        self.horizontalLayout_2.addWidget(self.ui_data_list_scroll_bar)
+
+
+        self.gridLayout_4.addLayout(self.horizontalLayout_2, 0, 0, 1, 1)
+
+        self.splitter_right.addWidget(self.widget_3)
         self.splitter_all.addWidget(self.splitter_right)
 
-        self.gridLayout_4.addWidget(self.splitter_all, 0, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.splitter_all, 0, 0, 1, 1)
 
 
         self.retranslateUi(TDMSViewer)

@@ -1,5 +1,6 @@
 import datetime
 import time
+
 import numpy as np
 from PySide6.QtCore import QThread, Slot, Signal
 from nptdms import TdmsFile, timestamp
@@ -8,7 +9,7 @@ from nptdms import TdmsFile, timestamp
 class ModelTDMS(QThread):
     signal_update_file_content = Signal(dict)
     signal_update_properties = Signal(list, list)
-    signal_update_points = Signal(dict)
+    signal_update_points = Signal(list)
 
     def __init__(self):
         super().__init__()
@@ -47,7 +48,7 @@ class ModelTDMS(QThread):
                     name_list.append(item[0])
                     if type(item[1]) is timestamp.TdmsTimestamp:
                         # 将nptdms的UTC时间类型转换为datetime的本地时间类型
-                        value_list.append(self.utc_to_local(item[1]))
+                        value_list.append(item[1].as_datetime() + self.time_offset)
                     elif type(item[1]) is float:
                         value_list.append("{:f}".format(float(item[1])))
                     else:
@@ -65,7 +66,7 @@ class ModelTDMS(QThread):
                 name_list.append(item[0])
                 if type(item[1]) is timestamp.TdmsTimestamp:
                     # 将nptdms的UTC时间类型转换为datetime的本地时间类型
-                    value_list.append(self.utc_to_local(item[1]))
+                    value_list.append(item[1].as_datetime() + self.time_offset)
                 elif type(item[1]) is float:
                     value_list.append("{:f}".format(float(item[1])))
                 else:
@@ -85,7 +86,7 @@ class ModelTDMS(QThread):
                 name_list.append(item[0])
                 if type(item[1]) is timestamp.TdmsTimestamp:
                     # 将nptdms的UTC时间类型转换为datetime的本地时间类型
-                    value_list.append(self.utc_to_local(item[1]))
+                    value_list.append(item[1].as_datetime() + self.time_offset)
                 elif type(item[1]) is float:
                     # 浮点数不以科学计数法显示
                     value_list.append("{:f}".format(float(item[1])))
@@ -113,8 +114,8 @@ class ModelTDMS(QThread):
         with TdmsFile.open(tdms_file_path) as tdms_file:
             points = {}  # 用于保存组数据
             for channel in tdms_file[group_name].channels():
-                points[group_name + "->" + channel.name] = [channel.properties["wf_start_time"],
-                                                            channel.properties["wf_increment"],
+                points[group_name + "->" + channel.name] = [channel.properties[""],
+                                                            channel.properties[""],
                                                             np.array(channel[start_index:start_index + samples])]
             # 发送组数据
             self.signal_update_points.emit(points)
@@ -123,15 +124,36 @@ class ModelTDMS(QThread):
     def slot_read_channel_points(self, tdms_file_path, group_name, channel_name, all_samples, start_index, samples):
         # 打开TDMS文件
         with TdmsFile.open(tdms_file_path) as tdms_file:
-            points_y = {}  # 用于保存通道数据
+            points = []
+            # y = []  # 用于保存通道数据
             channel = tdms_file[group_name][channel_name]
             # 读取通道数据
             if all_samples is True:
-                points_y[group_name + "->" + channel_name] = np.array(channel[:])
+                y = np.array(channel[:])
             else:
-                points_y[group_name + "->" + channel_name] = np.array(channel[start_index:start_index + samples])
-            # 发送通道数据
-            self.signal_update_points.emit(points_y)
+                y = np.array(channel[start_index:start_index + samples])
 
-    def utc_to_local(self, utc_time):
-        return utc_time.as_datetime() + self.time_offset
+            t0 = None
+            dt = None
+            if "wf_start_time" in channel.properties.keys():
+                t0 = channel.properties["wf_start_time"].astype(datetime.datetime) + self.time_offset
+                dt = channel.properties["wf_increment"]
+
+            channel_dict = {
+                                "name": group_name + "->" + channel_name,
+                                "t0": t0,
+                                "dt": dt,
+                                "y": y
+                            }
+            points.append(channel_dict)
+
+            # 发送通道数据
+            self.signal_update_points.emit(points)
+            '''
+            [{    
+                "name": str
+                "t0": datetime/None,
+                "dt": float,
+                "y": [float]
+            }]
+            '''

@@ -28,7 +28,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         # 属性
         self.file_path = None  # 保存选择的TDMS文件路径
 
-        self.data = None
+        self.current_points = [] # 记录当前通道数据，用于滚动条动态显示数据
 
         # 初始化文件选择器
         self.ui_file_dialog_btn.clicked.connect(self.slot_file_dialog_btn_click)
@@ -69,7 +69,15 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         # 设置列首背景
         self.ui_data_list.horizontalHeader().setStyleSheet("QHeaderView::section{background:rgb(220,220,220);}")
         self.data_list_model.setRowCount(20)  # 初始化行数
-        self.data_list_model.setColumnCount(10)  # 初始化列数
+        self.data_list_model.setColumnCount(15)  # 初始化列数
+
+        # 隐藏滑动杆
+        self.ui_data_list.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.ui_data_list.verticalScrollBar().setVisible(False)
+
+        self.ui_data_list_scroll_bar.setMaximum(0)
+        self.ui_data_list_scroll_bar.valueChanged.connect(self.slot_data_list_scroll_bar_value_change)
+
         # 清空列首和行首内容
         self.data_list_model.setHorizontalHeaderLabels(["" for i in range(self.data_list_model.columnCount())])
         self.data_list_model.setVerticalHeaderLabels(["" for i in range(self.data_list_model.rowCount())])
@@ -108,7 +116,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
 
         self.model_tdms.start()
 
-        self.file_path = r"C:\Users\YUGONGHUI\Desktop\Data\20240228_055622.tdms"
+        self.file_path = r"C:\Users\Administrator\Desktop\Test.tdms"
         self.signal_read_file_content.emit(self.file_path)
 
         self.ui_start_index.setMaximum(2147483647)
@@ -200,26 +208,56 @@ class ViewMain(QWidget, Ui_TDMSViewer):
                 self.ui_property_list.setItem(i, 1, item_value)
                 i = i + 1
 
-    @Slot(dict)
+    @Slot(list)
     def slot_update_points(self, points):
+        """
+            [{
+                "name": str
+                "t0": datetime/None,
+                "dt": float,
+                "y": [float]
+            }]
+        """
+        row_count = int(self.ui_data_list.height() / self.ui_data_list.rowHeight(1))
+
         self.data_list_model.clear()
         self.ui_chart.removeAllSeries()
+        self.current_points.clear()
 
-        # self.data = points
+        max_length = 0
 
-        for legend, samples in points.items():
+        for channel in points:
             data_list_column = []
 
-            # line = QLineSeries()
-            # line.setName(legend)
+            if len(channel["y"]) > max_length:
+                max_length = len(channel["y"])
 
-            # i = 1
-            for sample in samples:
-                data_list_column.append(QStandardItem("{:f}".format(sample)))
-            #     # line.append(i, sample)
-            #     i = i + 1
+            self.current_points.append(channel["y"])
+
+            for point in channel["y"][0: row_count]:
+                data_list_column.append(QStandardItem("{:f}".format(point)))
             self.data_list_model.appendColumn(data_list_column)
 
-            # self.ui_chart.addSeries(line)
-            # self.ui_chart.createDefaultAxes()
+        self.ui_data_list_scroll_bar.setValue(0)
+        self.ui_data_list_scroll_bar.setMaximum(max_length - row_count)
+
+    @Slot()
+    def slot_data_list_scroll_bar_value_change(self):
+        row_count = int(self.ui_data_list.height() / self.ui_data_list.rowHeight(1))
+        scroll_bar_value = self.ui_data_list_scroll_bar.value()
+
+        self.data_list_model.clear()
+
+        for channel_data in self.current_points:
+            data_list_column = []
+            for point in channel_data[scroll_bar_value: scroll_bar_value + row_count]:
+                data_list_column.append(QStandardItem("{:f}".format(point)))
+            self.data_list_model.appendColumn(data_list_column)
+
+            # 生成列首序号int列表
+            v_headers = list(range(scroll_bar_value + 1, (scroll_bar_value + 1 + row_count)))
+            # 将int列表转str列表，并赋值给控件列首
+            self.data_list_model.setVerticalHeaderLabels(list(map(str, v_headers)))
+
+
 
