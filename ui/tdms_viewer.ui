@@ -350,7 +350,7 @@
         </size>
        </property>
       </widget>
-      <widget class="QTableWidget" name="ui_data_list">
+      <widget class="QTableView" name="ui_data_list">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
          <horstretch>0</horstretch>

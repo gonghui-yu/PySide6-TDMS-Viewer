@@ -42,8 +42,6 @@ class ModelTDMS(QThread):
             name_list = ["Name"]
             value_list = [tdms_file.properties["name"]]
 
-            print(tdms_file.properties)
-
             for item in tdms_file.properties.items():
                 if item[0] != "name":
                     name_list.append(item[0])
@@ -121,18 +119,19 @@ class ModelTDMS(QThread):
             # 发送组数据
             self.signal_update_points.emit(points)
 
-    @Slot(str, str, str, int, int)
-    def slot_read_channel_points(self, tdms_file_path, group_name, channel_name, start_index, samples):
+    @Slot(str, str, str, bool, int, int)
+    def slot_read_channel_points(self, tdms_file_path, group_name, channel_name, all_samples, start_index, samples):
         # 打开TDMS文件
         with TdmsFile.open(tdms_file_path) as tdms_file:
-            points = {}  # 用于保存组数据
+            points_y = {}  # 用于保存通道数据
             channel = tdms_file[group_name][channel_name]
             # 读取通道数据
-            points[group_name + "->" + channel_name] = [channel.properties["wf_start_time"],
-                                                        channel.properties["wf_increment"],
-                                                        np.array(channel[start_index:start_index + samples])]
+            if all_samples is True:
+                points_y[group_name + "->" + channel_name] = np.array(channel[:])
+            else:
+                points_y[group_name + "->" + channel_name] = np.array(channel[start_index:start_index + samples])
             # 发送通道数据
-            self.signal_update_points.emit(points)
+            self.signal_update_points.emit(points_y)
 
     def utc_to_local(self, utc_time):
         return utc_time.as_datetime() + self.time_offset

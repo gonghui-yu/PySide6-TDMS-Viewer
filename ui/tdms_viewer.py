@@ -19,8 +19,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
 from PySide6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout,
     QHeaderView, QLabel, QPlainTextEdit, QPushButton,
     QSizePolicy, QSpacerItem, QSpinBox, QSplitter,
-    QTableWidget, QTableWidgetItem, QTreeWidget, QTreeWidgetItem,
-    QVBoxLayout, QWidget)
+    QTableView, QTableWidget, QTableWidgetItem, QTreeWidget,
+    QTreeWidgetItem, QVBoxLayout, QWidget)
 import ui.resource_rc
 
 class Ui_TDMSViewer(object):
@@ -209,7 +209,7 @@ class Ui_TDMSViewer(object):
         self.ui_graph.setSizePolicy(sizePolicy5)
         self.ui_graph.setMinimumSize(QSize(0, 0))
         self.splitter_right.addWidget(self.ui_graph)
-        self.ui_data_list = QTableWidget(self.splitter_right)
+        self.ui_data_list = QTableView(self.splitter_right)
         self.ui_data_list.setObjectName(u"ui_data_list")
         sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         sizePolicy9.setHorizontalStretch(0)

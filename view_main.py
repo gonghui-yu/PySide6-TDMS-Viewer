@@ -1,9 +1,8 @@
 import os.path
 
-from PySide6 import QtCore
-from PySide6.QtCore import Slot, Signal, QThread, QObject
+from PySide6.QtCore import Slot, Signal
 from PySide6.QtCharts import QChart, QValueAxis, QDateTimeAxis, QLineSeries
-from PySide6.QtGui import QPainter
+from PySide6.QtGui import QPainter, QStandardItemModel, QStandardItem
 from PySide6.QtWidgets import QWidget, QFileDialog, QTreeWidgetItem, QHeaderView, QAbstractItemView, QSizePolicy, \
     QTableWidgetItem
 from PySide6.QtCore import Qt
@@ -19,7 +18,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
     signal_read_channel_properties = Signal(str, str, str)
     signal_read_file_points = Signal(str, int, int)
     signal_read_group_points = Signal(str, str, int, int)
-    signal_read_channel_points = Signal(str, str, str, int, int)
+    signal_read_channel_points = Signal(str, str, str, bool, int, int)
 
     def __init__(self):
         super().__init__()
@@ -28,6 +27,8 @@ class ViewMain(QWidget, Ui_TDMSViewer):
 
         # 属性
         self.file_path = None  # 保存选择的TDMS文件路径
+
+        self.data = None
 
         # 初始化文件选择器
         self.ui_file_dialog_btn.clicked.connect(self.slot_file_dialog_btn_click)
@@ -60,12 +61,18 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         self.ui_property_list.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Interactive)
 
         # 初始化数据列表
-        self.ui_data_list.setColumnCount(10)  # 设置列数，不设置列首不显示
-        self.ui_data_list.setRowCount(20)
-        self.ui_data_list.setHorizontalHeaderLabels([])  # 设置列首
+        self.data_list_model = QStandardItemModel(self.ui_data_list)
+        self.ui_data_list.setModel(self.data_list_model)
+        self.ui_data_list.setGridStyle(Qt.PenStyle.SolidLine)  # 设置单元格分隔线类型
+        self.ui_data_list.setShowGrid(True)  # 设置显示单元格分隔线
         self.ui_data_list.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)  # 不可编辑单元格内容
         # 设置列首背景
         self.ui_data_list.horizontalHeader().setStyleSheet("QHeaderView::section{background:rgb(220,220,220);}")
+        self.data_list_model.setRowCount(20)  # 初始化行数
+        self.data_list_model.setColumnCount(10)  # 初始化列数
+        # 清空列首和行首内容
+        self.data_list_model.setHorizontalHeaderLabels(["" for i in range(self.data_list_model.columnCount())])
+        self.data_list_model.setVerticalHeaderLabels(["" for i in range(self.data_list_model.rowCount())])
 
         # 初始化波形图
         self.ui_chart = QChart()
@@ -165,6 +172,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
             self.signal_read_channel_points.emit(self.file_path,
                                                  self.ui_file_content.currentItem().parent().text(0),
                                                  self.ui_file_content.currentItem().text(0),
+                                                 self.ui_is_all_samples.isChecked(),
                                                  self.ui_start_index.value(),
                                                  self.ui_samples.value())
 
@@ -194,4 +202,24 @@ class ViewMain(QWidget, Ui_TDMSViewer):
 
     @Slot(dict)
     def slot_update_points(self, points):
-        pass
+        self.data_list_model.clear()
+        self.ui_chart.removeAllSeries()
+
+        # self.data = points
+
+        for legend, samples in points.items():
+            data_list_column = []
+
+            # line = QLineSeries()
+            # line.setName(legend)
+
+            # i = 1
+            for sample in samples:
+                data_list_column.append(QStandardItem("{:f}".format(sample)))
+            #     # line.append(i, sample)
+            #     i = i + 1
+            self.data_list_model.appendColumn(data_list_column)
+
+            # self.ui_chart.addSeries(line)
+            # self.ui_chart.createDefaultAxes()
+
