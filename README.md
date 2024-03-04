@@ -1,8 +1,7 @@
 # PySide6-TDMS-Viewer
 ## 指令
 ```commandline
-cd .\ui\ 
-pyside6-uic .\tdms_viewer.ui -o .\tdms_viewer.py
+pyside6-uic .\ui\tdms_viewer.ui -o .\ui\tdms_viewer.py
 pyside6-ucc .\resource.qrc -o .\resource_rc.py
 
 pip freeze > requirements.txt

@@ -80,6 +80,9 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         self.splitter_right.setStretchFactor(0, 8)
         self.splitter_right.setStretchFactor(1, 2)
 
+        self.splitter_all.setStretchFactor(0, 2)
+        self.splitter_all.setStretchFactor(1, 8)
+
         self.model_tdms = ModelTDMS()
 
         self.signal_read_file_content.connect(self.model_tdms.slot_read_file_content)
@@ -176,14 +179,13 @@ class ViewMain(QWidget, Ui_TDMSViewer):
                                                self.ui_start_index.value(),
                                                self.ui_samples.value())
 
-    @Slot(dict)
-    def slot_update_properties(self, properties):
-        if len(properties) == 0:
-            self.ui_property_list.clear()
-        else:
+    @Slot(list, list)
+    def slot_update_properties(self, name_list, value_list):
+        self.ui_property_list.clear()
+        if len(name_list) != 0 and len(value_list) != 0:
             i = 0
-            for key, value in properties.items():
-                item_key = QTableWidgetItem(key)
+            for name, value in zip(name_list, value_list):
+                item_key = QTableWidgetItem(name)
                 self.ui_property_list.setItem(i, 0, item_key)
 
                 item_value = QTableWidgetItem(str(value))

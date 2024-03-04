@@ -39,8 +39,8 @@
      </property>
      <widget class="QSplitter" name="splitter_left">
       <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-        <horstretch>2</horstretch>
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>3</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
@@ -317,7 +317,7 @@
      <widget class="QSplitter" name="splitter_right">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-        <horstretch>8</horstretch>
+        <horstretch>7</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
