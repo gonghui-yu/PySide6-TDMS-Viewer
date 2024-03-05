@@ -117,15 +117,15 @@ class Ui_TDMSViewer(object):
         self.ui_file_content.setAutoFillBackground(False)
         self.ui_file_content.setMidLineWidth(0)
         self.splitter_left.addWidget(self.ui_file_content)
-        self.ui_property_list = QTableWidget(self.splitter_left)
-        self.ui_property_list.setObjectName(u"ui_property_list")
+        self.ui_prop_tab = QTableWidget(self.splitter_left)
+        self.ui_prop_tab.setObjectName(u"ui_prop_tab")
         sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         sizePolicy6.setHorizontalStretch(0)
         sizePolicy6.setVerticalStretch(3)
-        sizePolicy6.setHeightForWidth(self.ui_property_list.sizePolicy().hasHeightForWidth())
-        self.ui_property_list.setSizePolicy(sizePolicy6)
-        self.ui_property_list.setMinimumSize(QSize(0, 0))
-        self.splitter_left.addWidget(self.ui_property_list)
+        sizePolicy6.setHeightForWidth(self.ui_prop_tab.sizePolicy().hasHeightForWidth())
+        self.ui_prop_tab.setSizePolicy(sizePolicy6)
+        self.ui_prop_tab.setMinimumSize(QSize(0, 0))
+        self.splitter_left.addWidget(self.ui_prop_tab)
         self.widget_2 = QWidget(self.splitter_left)
         self.widget_2.setObjectName(u"widget_2")
         sizePolicy7 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
@@ -179,10 +179,10 @@ class Ui_TDMSViewer(object):
 
         self.verticalLayout_3.addItem(self.verticalSpacer_2)
 
-        self.ui_is_all_samples = QCheckBox(self.widget_2)
-        self.ui_is_all_samples.setObjectName(u"ui_is_all_samples")
+        self.ui_all_samples = QCheckBox(self.widget_2)
+        self.ui_all_samples.setObjectName(u"ui_all_samples")
 
-        self.verticalLayout_3.addWidget(self.ui_is_all_samples)
+        self.verticalLayout_3.addWidget(self.ui_all_samples)
 
 
         self.horizontalLayout.addLayout(self.verticalLayout_3)
@@ -216,22 +216,22 @@ class Ui_TDMSViewer(object):
         self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.ui_data_list = QTableView(self.widget_3)
-        self.ui_data_list.setObjectName(u"ui_data_list")
+        self.ui_points_tab = QTableView(self.widget_3)
+        self.ui_points_tab.setObjectName(u"ui_points_tab")
         sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         sizePolicy9.setHorizontalStretch(0)
         sizePolicy9.setVerticalStretch(4)
-        sizePolicy9.setHeightForWidth(self.ui_data_list.sizePolicy().hasHeightForWidth())
-        self.ui_data_list.setSizePolicy(sizePolicy9)
-        self.ui_data_list.setMinimumSize(QSize(0, 0))
+        sizePolicy9.setHeightForWidth(self.ui_points_tab.sizePolicy().hasHeightForWidth())
+        self.ui_points_tab.setSizePolicy(sizePolicy9)
+        self.ui_points_tab.setMinimumSize(QSize(0, 0))
 
-        self.horizontalLayout_2.addWidget(self.ui_data_list)
+        self.horizontalLayout_2.addWidget(self.ui_points_tab)
 
-        self.ui_data_list_scroll_bar = QScrollBar(self.widget_3)
-        self.ui_data_list_scroll_bar.setObjectName(u"ui_data_list_scroll_bar")
-        self.ui_data_list_scroll_bar.setOrientation(Qt.Vertical)
+        self.ui_points_tab_v_bar = QScrollBar(self.widget_3)
+        self.ui_points_tab_v_bar.setObjectName(u"ui_points_tab_v_bar")
+        self.ui_points_tab_v_bar.setOrientation(Qt.Vertical)
 
-        self.horizontalLayout_2.addWidget(self.ui_data_list_scroll_bar)
+        self.horizontalLayout_2.addWidget(self.ui_points_tab_v_bar)
 
 
         self.gridLayout_4.addLayout(self.horizontalLayout_2, 0, 0, 1, 1)
@@ -252,6 +252,6 @@ class Ui_TDMSViewer(object):
         self.ui_file_dialog_btn.setText("")
         self.label.setText(QCoreApplication.translate("TDMSViewer", u"\u5f00\u59cb\u7d22\u5f15", None))
         self.label_2.setText(QCoreApplication.translate("TDMSViewer", u"\u70b9\u6570", None))
-        self.ui_is_all_samples.setText(QCoreApplication.translate("TDMSViewer", u"\u6240\u6709\u70b9", None))
+        self.ui_all_samples.setText(QCoreApplication.translate("TDMSViewer", u"\u6240\u6709\u70b9", None))
     # retranslateUi
 

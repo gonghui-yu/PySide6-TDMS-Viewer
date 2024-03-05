@@ -2,12 +2,12 @@ import datetime
 import time
 
 import numpy as np
-from PySide6.QtCore import QThread, Slot, Signal
+from PySide6.QtCore import QThread, Slot, Signal, QDateTime, QTime
 from nptdms import TdmsFile, timestamp
 
 
 class ModelTDMS(QThread):
-    signal_update_file_content = Signal(dict)
+    signal_update_file_content = Signal(list)
     signal_update_properties = Signal(list, list)
     signal_update_points = Signal(list)
 
@@ -25,16 +25,30 @@ class ModelTDMS(QThread):
         # 打开TDMS文件
         with TdmsFile.open(tdms_file_path) as tdms_file:
             # 创建字典，保存文件内容（通道、属性列表）
-            file_content_dict = {}
+            file_content = []
             for group in tdms_file.groups():
-                channel_list = []
+                channel_name_list = []
                 for channel in group.channels():
-                    channel_list.append(channel.name)
-                file_content_dict[group.name] = channel_list
+                    channel_name_list.append(channel.name)
+
+                file_content.append({
+                    "group_name": group.name,
+                    "channel_name_list": channel_name_list
+                })
+
             # 发送文件内容到界面
-            self.signal_update_file_content.emit(file_content_dict)
+            self.signal_update_file_content.emit(file_content)
             # 关闭文件
             tdms_file.close()
+            '''
+            [
+                {
+                    "group_name": str,
+                    "channel_name_list": [str]
+                }
+            ]
+            '''
+
 
     @Slot(str)
     def slot_read_file_properties(self, tdms_file_path):
@@ -95,28 +109,61 @@ class ModelTDMS(QThread):
 
             self.signal_update_properties.emit(name_list, value_list)
 
-    @Slot(str, str)
-    def slot_read_file_points(self, tdms_file_path, start_index, samples):
+    @Slot(str, bool, int, int)
+    def slot_read_file_points(self, tdms_file_path, all_samples, start_index, samples):
         # 打开TDMS文件
         with TdmsFile.open(tdms_file_path) as tdms_file:
-            points = {}
+            points = []
             for group in tdms_file.groups():
                 for channel in group.channels():
-                    points[group.name + "->" + channel.name] = [channel.properties["wf_start_time"],
-                                                                channel.properties["wf_increment"],
-                                                                np.array(channel[start_index:start_index + samples])]
+                    if all_samples is True:
+                        y = np.array(channel[:])
+                    else:
+                        y = np.array(channel[start_index:start_index + samples])
+
+                    if "wf_start_time" in channel.properties.keys():
+                        t0 = channel.properties["wf_start_time"].astype(datetime.datetime) + self.time_offset
+                        dt = channel.properties["wf_increment"]
+                        unit = channel.properties["NI_UnitDescription"]
+
+                    channel_dict = {
+                        "group_name": group.name,
+                        "channel_name": channel.name,
+                        "unit": unit,
+                        "t0": t0,
+                        "dt": dt,
+                        "y": y
+                    }
+                    points.append(channel_dict)
+
             # 发送文件数据
             self.signal_update_points.emit(points)
 
-    @Slot(str, str)
-    def slot_read_group_points(self, tdms_file_path, group_name, start_index, samples):
+    @Slot(str, str, bool, int, int)
+    def slot_read_group_points(self, tdms_file_path, group_name, all_samples, start_index, samples):
         # 打开TDMS文件
         with TdmsFile.open(tdms_file_path) as tdms_file:
-            points = {}  # 用于保存组数据
+            points = []  # 用于保存组数据
             for channel in tdms_file[group_name].channels():
-                points[group_name + "->" + channel.name] = [channel.properties[""],
-                                                            channel.properties[""],
-                                                            np.array(channel[start_index:start_index + samples])]
+                if all_samples is True:
+                    y = np.array(channel[:])
+                else:
+                    y = np.array(channel[start_index:start_index + samples])
+
+                if "wf_start_time" in channel.properties.keys():
+                    t0 = channel.properties["wf_start_time"].astype(datetime.datetime) + self.time_offset
+                    dt = channel.properties["wf_increment"]
+                    unit = channel.properties["NI_UnitDescription"]
+
+                channel_dict = {
+                    "group_name": group_name,
+                    "channel_name": channel.name,
+                    "unit": unit,
+                    "t0": t0,
+                    "dt": dt,
+                    "y": y
+                }
+                points.append(channel_dict)
             # 发送组数据
             self.signal_update_points.emit(points)
 
@@ -133,14 +180,15 @@ class ModelTDMS(QThread):
             else:
                 y = np.array(channel[start_index:start_index + samples])
 
-            t0 = None
-            dt = None
             if "wf_start_time" in channel.properties.keys():
                 t0 = channel.properties["wf_start_time"].astype(datetime.datetime) + self.time_offset
                 dt = channel.properties["wf_increment"]
+                unit = channel.properties["NI_UnitDescription"]
 
             channel_dict = {
-                                "name": group_name + "->" + channel_name,
+                                "group_name": group_name,
+                                "channel_name": channel_name,
+                                "unit": unit,
                                 "t0": t0,
                                 "dt": dt,
                                 "y": y
@@ -149,11 +197,3 @@ class ModelTDMS(QThread):
 
             # 发送通道数据
             self.signal_update_points.emit(points)
-            '''
-            [{    
-                "name": str
-                "t0": datetime/None,
-                "dt": float,
-                "y": [float]
-            }]
-            '''
