@@ -1,12 +1,12 @@
+import math
 import os.path
-import datetime
 
 import numpy
 from PySide6.QtCore import Slot, Signal, QPointF, QDateTime
 from PySide6.QtCharts import QChart, QValueAxis, QDateTimeAxis, QLineSeries
 from PySide6.QtGui import QPainter, QStandardItemModel, QStandardItem, QFont
 from PySide6.QtWidgets import QWidget, QFileDialog, QTreeWidgetItem, QHeaderView, QAbstractItemView, QSizePolicy, \
-    QTableWidgetItem
+    QTableWidgetItem, QStyle
 from PySide6.QtCore import Qt
 from ui.tdms_viewer import Ui_TDMSViewer
 
@@ -45,7 +45,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         self.model_tdms = ModelTDMS()  # 创建ModelTDMS对象
         self.init_model_tdms()  # 初始化ModelTDMS对象
 
-        self.file_path = r"C:\Users\YUGONGHUI\Desktop\Data\20240228_055622.tdms"
+        self.file_path = r"C:\Users\Administrator\Desktop\Test.tdms"
         self.signal_read_file_content.emit(self.file_path)
 
         self.ui_start_index.setMaximum(2147483647)
@@ -234,6 +234,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
     @Slot(list, list)
     def slot_update_properties(self, name_list, value_list):
         self.ui_prop_tab.clear()
+        self.ui_prop_tab.setRowCount(len(name_list))
         if len(name_list) != 0 and len(value_list) != 0:
             i = 0
             for name, value in zip(name_list, value_list):
@@ -288,6 +289,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
     def update_points_tab(self, points):
         # 当前控件大小能显示多少行
         row_count = int(self.ui_points_tab.height() / self.ui_points_tab.rowHeight(1))
+        print(row_count)
         self.points_tab_model.clear()  # 清空数据表
         self.current_points.clear()  # 清空当前记录数据
         self.header_label_list.clear()  # 清空保存的列首
@@ -308,7 +310,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
             self.header_label_list.append(
                 channel["group_name"] + "\n" + channel["channel_name"] + "\n" + channel["unit"])
 
-            for point in channel["y"][0: row_count]:
+            for point in channel["y"][0: row_count - 1]:
                 points_show_column.append(QStandardItem("{:f}".format(point)))
             self.points_tab_model.appendColumn(points_show_column)
 
@@ -339,12 +341,13 @@ class ViewMain(QWidget, Ui_TDMSViewer):
                 is_x_value = True
                 break
         # 创建X轴
-        if is_x_value is True: # 创建数字X轴
+        if is_x_value is True:  # 创建数字X轴
             axis_x = QValueAxis()
             axis_x.setTitleText("点")
-        else: # 创建时间X轴
+        else:  # 创建时间X轴
             axis_x = QDateTimeAxis()
             axis_x.setTitleText("时间")
+            axis_x.setFormat("h:m:s:zzz<br>yyyy-M-d")
         axis_x.setTickCount(10)
         axis_x.setGridLineVisible(True)
         self.ui_chart.setAxisX(axis_x)
@@ -360,7 +363,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
 
         for channel in points:
             line = QLineSeries()
-
+            line.setName(channel["group_name"] + "->" + channel["channel_name"])
             # 创建X轴数据
             if is_x_value is True:
                 min_value = 1
@@ -368,7 +371,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
                 x_list = list(range(min_value, max_value, 1))
             else:
                 min_time = channel["t0"].timestamp()
-                max_time = min_time + channel["dt"] * (len(channel["y"]) + 1)
+                max_time = min_time + channel["dt"] * len(channel["y"])
                 x_list = numpy.linspace(min_time, max_time, len(channel["y"]))
 
             min_x_list.append(min(x_list))
@@ -385,8 +388,12 @@ class ViewMain(QWidget, Ui_TDMSViewer):
             self.ui_chart.addSeries(line)
 
         # 设定XY轴范围
+        if is_x_value:
+            min_x = min(min_x_list)
+            max_x = max(max_x_list)
+        else:
+            min_x = QDateTime.fromSecsSinceEpoch(math.floor(min(min_x_list)))
+            max_x = QDateTime.fromSecsSinceEpoch(math.ceil(max(max_x_list)))
 
-        # print(type(QDateTime.fromSecsSinceEpoch(min(min_x_list))))
-
-        axis_x.setRange(min(min_x_list), max(max_x_list))
+        axis_x.setRange(min_x, max_x)
         axis_y.setRange(min(min_y_list), max(max_y_list))

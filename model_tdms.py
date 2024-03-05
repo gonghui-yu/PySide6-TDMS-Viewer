@@ -49,7 +49,6 @@ class ModelTDMS(QThread):
             ]
             '''
 
-
     @Slot(str)
     def slot_read_file_properties(self, tdms_file_path):
         # 打开TDMS文件
@@ -121,9 +120,12 @@ class ModelTDMS(QThread):
                     else:
                         y = np.array(channel[start_index:start_index + samples])
 
+                    t0, dt, unit = None, None, ""
                     if "wf_start_time" in channel.properties.keys():
                         t0 = channel.properties["wf_start_time"].astype(datetime.datetime) + self.time_offset
                         dt = channel.properties["wf_increment"]
+
+                    if "NI_UnitDescription" in channel.properties.keys():
                         unit = channel.properties["NI_UnitDescription"]
 
                     channel_dict = {
@@ -150,9 +152,12 @@ class ModelTDMS(QThread):
                 else:
                     y = np.array(channel[start_index:start_index + samples])
 
+                t0, dt, unit = None, None, ""
                 if "wf_start_time" in channel.properties.keys():
                     t0 = channel.properties["wf_start_time"].astype(datetime.datetime) + self.time_offset
                     dt = channel.properties["wf_increment"]
+
+                if "NI_UnitDescription" in channel.properties.keys():
                     unit = channel.properties["NI_UnitDescription"]
 
                 channel_dict = {
@@ -180,9 +185,12 @@ class ModelTDMS(QThread):
             else:
                 y = np.array(channel[start_index:start_index + samples])
 
+            t0, dt, unit = None, None, ""
             if "wf_start_time" in channel.properties.keys():
                 t0 = channel.properties["wf_start_time"].astype(datetime.datetime) + self.time_offset
                 dt = channel.properties["wf_increment"]
+
+            if "NI_UnitDescription" in channel.properties.keys():
                 unit = channel.properties["NI_UnitDescription"]
 
             channel_dict = {
