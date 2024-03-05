@@ -45,9 +45,6 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         self.model_tdms = ModelTDMS()  # 创建ModelTDMS对象
         self.init_model_tdms()  # 初始化ModelTDMS对象
 
-        self.file_path = r"C:\Users\Administrator\Desktop\Test.tdms"
-        self.signal_read_file_content.emit(self.file_path)
-
         self.ui_start_index.setMaximum(2147483647)
         self.ui_start_index.setMinimum(0)
         self.ui_start_index.setValue(0)
@@ -174,6 +171,8 @@ class ViewMain(QWidget, Ui_TDMSViewer):
                 }
             ]
         """
+        self.ui_file_content.clear()
+
         # 文件层级
         file_level_item = QTreeWidgetItem()
         file_level_item.setText(0, os.path.split(self.file_path)[1])
@@ -289,7 +288,6 @@ class ViewMain(QWidget, Ui_TDMSViewer):
     def update_points_tab(self, points):
         # 当前控件大小能显示多少行
         row_count = int(self.ui_points_tab.height() / self.ui_points_tab.rowHeight(1))
-        print(row_count)
         self.points_tab_model.clear()  # 清空数据表
         self.current_points.clear()  # 清空当前记录数据
         self.header_label_list.clear()  # 清空保存的列首
@@ -344,6 +342,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         if is_x_value is True:  # 创建数字X轴
             axis_x = QValueAxis()
             axis_x.setTitleText("点")
+            axis_x.setLabelFormat("%d")
         else:  # 创建时间X轴
             axis_x = QDateTimeAxis()
             axis_x.setTitleText("时间")
@@ -395,5 +394,10 @@ class ViewMain(QWidget, Ui_TDMSViewer):
             min_x = QDateTime.fromSecsSinceEpoch(math.floor(min(min_x_list)))
             max_x = QDateTime.fromSecsSinceEpoch(math.ceil(max(max_x_list)))
 
+        min_y = min(min_y_list)
+        min_y = min_y - abs(min_y) * 0.05
+        max_y = max(max_y_list)
+        max_y = max_y + abs(max_y) * 0.05
+
         axis_x.setRange(min_x, max_x)
-        axis_y.setRange(min(min_y_list), max(max_y_list))
+        axis_y.setRange(min_y, max_y)
