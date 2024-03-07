@@ -158,7 +158,10 @@ class ViewMain(QWidget, Ui_TDMSViewer):
     def slot_file_dialog_btn_click(self):
         self.file_path = QFileDialog.getOpenFileName(self, "选择TDMS文件", "", "*.tdms")[0]
         self.ui_file_path.setPlainText(self.file_path)
-        if self.file_path is not None:
+
+        print(self.file_path)
+
+        if self.file_path != "":
             self.signal_read_file_content.emit(self.file_path)
 
     @Slot(list)
