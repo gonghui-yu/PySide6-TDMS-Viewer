@@ -1,15 +1,19 @@
-import math
+import datetime
 import os.path
 
 import numpy
-from PySide6.QtCore import Slot, Signal, QPointF, QDateTime
-from PySide6.QtCharts import QChart, QValueAxis, QDateTimeAxis, QLineSeries
-from PySide6.QtGui import QPainter, QStandardItemModel, QStandardItem, QFont
-from PySide6.QtWidgets import QWidget, QFileDialog, QTreeWidgetItem, QHeaderView, QAbstractItemView, QSizePolicy, \
-    QTableWidgetItem, QStyle
+from PySide6.QtCore import Slot, Signal
+from PySide6.QtGui import QStandardItemModel, QStandardItem, QFont
+from PySide6.QtWidgets import QWidget, QFileDialog, QTreeWidgetItem, QHeaderView, QAbstractItemView, QTableWidgetItem
 from PySide6.QtCore import Qt
-from ui.tdms_viewer import Ui_TDMSViewer
+import matplotlib.dates as md
 
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, \
+    NavigationToolbar2QT as NavigationToolbar
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+
+from ui.tdms_viewer import Ui_TDMSViewer
 from model_tdms import ModelTDMS
 
 
@@ -24,6 +28,7 @@ class ViewMain(QWidget, Ui_TDMSViewer):
 
     def __init__(self):
         super().__init__()
+
         self.setupUi(self)
         self.setWindowTitle("TDMS查看器")  # 设置窗口标题
 
@@ -39,8 +44,13 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         self.header_label_list = []  # 数据表列首内容
         self.init_points_tab()  # # 初始化数据列表
 
-        self.ui_chart = QChart()
+        self.axes = None
+        self.canvas = None
+        self.figure = None
         self.init_chart()  # 初始化波形图
+
+        # 设置右侧分隔栏初始比例
+        self.splitter_right.setSizes([60000, 40000])
 
         self.model_tdms = ModelTDMS()  # 创建ModelTDMS对象
         self.init_model_tdms()  # 初始化ModelTDMS对象
@@ -52,11 +62,6 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         self.ui_samples.setMinimum(0)
         self.ui_samples.setValue(10)
         self.ui_all_samples.setChecked(False)
-
-    def __del__(self):
-        # 窗口关闭不执行
-        print("析构函数")
-        # self.model_tdms.quit()
 
     def init_file_dialog(self):
         # 初始化文件选择器
@@ -71,12 +76,6 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         self.ui_file_content.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)  # 设置一次只能选中一行
 
         self.ui_file_content.clicked.connect(self.slot_read_file)
-
-        # self.ui_file_content.setStyleSheet("QTreeView{show-decoration-selected:1;background:rgb(61,66,77);}"
-        #                                    "QTreeView::item{border:2px;color:rgb(255,255,255);}"
-        #                                    "QTreeView::item:selected,QTreeView::branch:selected{background:rgb(28,77,"
-        #                                    "120);}"
-        #                                    "QTreeView::item:hover,QTreeView::branch:hover{background:rgb(64,91,134);}")
 
     def init_property_tab(self):
         self.ui_prop_tab.setColumnCount(2)  # 设置列数，不设置列首不显示
@@ -126,16 +125,18 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         self.points_tab_model.setVerticalHeaderLabels(["" for i in range(self.points_tab_model.rowCount())])
 
     def init_chart(self):
-        self.ui_graph.setChart(self.ui_chart)
-        self.ui_chart.addSeries(QLineSeries())
-        self.ui_chart.createDefaultAxes()  # 创建默认坐标轴，基于已经添加到chart中的series
-        self.ui_chart.legend().setVisible(True)  # 显示图例
-        self.ui_chart.legend().setAlignment(Qt.AlignRight)  # 图例显示在波形图右侧
-        self.ui_graph.setRenderHint(QPainter.Antialiasing)  # 反锯齿绘制
+        self.figure = Figure(tight_layout=True)  # tight_layout，是否根据layout大小自动调整图像大小
+        self.canvas = FigureCanvas(self.figure)  # 创建画布
+        self.axes = self.figure.add_subplot()  # 创建曲线，返回坐标轴
+        toolbar = NavigationToolbar(self.canvas, self)  # 创建波形图工具栏
 
-        # 设置初始比例，因为QChart不能在.ui中设置初始比例
-        self.splitter_right.setStretchFactor(0, 8)
-        self.splitter_right.setStretchFactor(1, 2)
+        self.verticalLayout_4.addWidget(toolbar)
+        self.verticalLayout_4.addWidget(self.canvas)
+
+        self.axes.grid(linestyle="--")
+
+        plt.rcParams['font.sans-serif'] = ['SimHei']  # 指定默认字体，解决中文乱码问题
+        plt.rcParams['axes.unicode_minus'] = False  # 解决保存图像是负号'-'显示为方块的问题
 
     def init_model_tdms(self):
         self.signal_read_file_content.connect(self.model_tdms.slot_read_file_content)
@@ -158,8 +159,6 @@ class ViewMain(QWidget, Ui_TDMSViewer):
     def slot_file_dialog_btn_click(self):
         self.file_path = QFileDialog.getOpenFileName(self, "选择TDMS文件", "", "*.tdms")[0]
         self.ui_file_path.setPlainText(self.file_path)
-
-        print(self.file_path)
 
         if self.file_path != "":
             self.signal_read_file_content.emit(self.file_path)
@@ -324,16 +323,16 @@ class ViewMain(QWidget, Ui_TDMSViewer):
 
     def update_chart(self, points):
         """ points
-            [{
-                "group_name": str,
-                "channel_name": str,
-                "unit": str,
-                "t0": datetime/None,
-                "dt": float,
-                "y": [float]
-            }]
-        """
-        self.ui_chart.removeAllSeries()  # 清空波形图
+            #         [{
+            #             "group_name": str,
+            #             "channel_name": str,
+            #             "unit": str,
+            #             "t0": datetime/None,
+            #             "dt": float,
+            #             "y": [float]
+            #         }]
+            #     """
+        self.axes.cla()
 
         # 只要有一个通道没有时间戳，就使用数字X轴
         is_x_value = False
@@ -341,66 +340,23 @@ class ViewMain(QWidget, Ui_TDMSViewer):
             if channel["t0"] is None:
                 is_x_value = True
                 break
-        # 创建X轴
-        if is_x_value is True:  # 创建数字X轴
-            axis_x = QValueAxis()
-            axis_x.setTitleText("点")
-            axis_x.setLabelFormat("%d")
-        else:  # 创建时间X轴
-            axis_x = QDateTimeAxis()
-            axis_x.setTitleText("时间")
-            axis_x.setFormat("h:m:s:zzz<br>yyyy-M-d")
-        axis_x.setTickCount(10)
-        axis_x.setGridLineVisible(True)
-        self.ui_chart.setAxisX(axis_x)
-
-        # 创建Y轴
-        axis_y = QValueAxis()
-        axis_y.setTitleText("值")
-        axis_y.setTickCount(10)
-        axis_y.setGridLineVisible(True)
-        self.ui_chart.setAxisY(axis_y)
-
-        min_x_list, max_x_list, min_y_list, max_y_list = [], [], [], []
 
         for channel in points:
-            line = QLineSeries()
-            line.setName(channel["group_name"] + "->" + channel["channel_name"])
-            # 创建X轴数据
-            if is_x_value is True:
-                min_value = 1
-                max_value = len(channel["y"]) + 1
-                x_list = list(range(min_value, max_value, 1))
+            # 创建X轴
+            if is_x_value is True:  # 创建数字X轴
+                x_value = list(range(1, len(channel["y"] + 1)))
+                self.axes.xaxis.set_major_formatter(md.F)
             else:
-                min_time = channel["t0"].timestamp()
-                max_time = min_time + channel["dt"] * len(channel["y"])
-                x_list = numpy.linspace(min_time, max_time, len(channel["y"]))
+                min_time = channel["t0"].timestamp()  # 将开始时间转换为float时间
+                max_time = min_time + channel["dt"] * (len(channel["y"] - 1))  # 计算获得float结束时间
+                x_value = numpy.linspace(min_time, max_time, len(channel["y"]))  # 生成float时间列表
+                x_value = [datetime.datetime.fromtimestamp(Ttime) for Ttime in x_value]   # 将float时间列表转换为datetime时间列表
+                self.axes.xaxis.set_major_formatter(md.DateFormatter("%H:%M:%S.%f \n %Y-%m-%d"))  # 设置X轴时间显示格式
+                self.axes.xaxis.set_major_locator(md.AutoDateLocator())  # 设置X轴时间标签位置自适应，防止重叠
 
-            min_x_list.append(min(x_list))
-            max_x_list.append(max(x_list))
-            min_y_list.append(min(channel["y"]))
-            max_y_list.append(max(channel["y"]))
+            # 赋值画图
+            self.axes.plot(x_value, channel["y"], label=channel["group_name"] + ":" + channel["channel_name"])  # 耗时
 
-            # 创建Y轴数据
-            point_list = []
-            for x, y in zip(x_list, channel["y"]):
-                point_list.append(QPointF(x, y))
-
-            line.replace(point_list)
-            self.ui_chart.addSeries(line)
-
-        # 设定XY轴范围
-        if is_x_value:
-            min_x = min(min_x_list)
-            max_x = max(max_x_list)
-        else:
-            min_x = QDateTime.fromSecsSinceEpoch(math.floor(min(min_x_list)))
-            max_x = QDateTime.fromSecsSinceEpoch(math.ceil(max(max_x_list)))
-
-        min_y = min(min_y_list)
-        min_y = min_y - abs(min_y) * 0.05
-        max_y = max(max_y_list)
-        max_y = max_y + abs(max_y) * 0.05
-
-        axis_x.setRange(min_x, max_x)
-        axis_y.setRange(min_y, max_y)
+        self.axes.legend(loc=1)  # 在右上角显示图例
+        self.axes.grid(linestyle="--")  # 以虚线显示网格
+        self.canvas.draw()  # 画图刷新

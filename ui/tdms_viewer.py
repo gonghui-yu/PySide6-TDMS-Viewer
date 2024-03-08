@@ -8,7 +8,6 @@
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCharts import QChartView
 from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
     QMetaObject, QObject, QPoint, QRect,
     QSize, QTime, QUrl, Qt)
@@ -17,10 +16,11 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout,
-    QHeaderView, QLabel, QPlainTextEdit, QPushButton,
-    QScrollBar, QSizePolicy, QSpacerItem, QSpinBox,
-    QSplitter, QTableView, QTableWidget, QTableWidgetItem,
-    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+    QHeaderView, QLabel, QLayout, QPlainTextEdit,
+    QPushButton, QScrollBar, QSizePolicy, QSpacerItem,
+    QSpinBox, QSplitter, QTableView, QTableWidget,
+    QTableWidgetItem, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
+    QWidget)
 import ui.resource_rc
 
 class Ui_TDMSViewer(object):
@@ -43,7 +43,7 @@ class Ui_TDMSViewer(object):
         self.splitter_all.setChildrenCollapsible(False)
         self.splitter_left = QSplitter(self.splitter_all)
         self.splitter_left.setObjectName(u"splitter_left")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy1 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         sizePolicy1.setHorizontalStretch(2)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(self.splitter_left.sizePolicy().hasHeightForWidth())
@@ -113,18 +113,18 @@ class Ui_TDMSViewer(object):
         sizePolicy5.setVerticalStretch(6)
         sizePolicy5.setHeightForWidth(self.ui_file_content.sizePolicy().hasHeightForWidth())
         self.ui_file_content.setSizePolicy(sizePolicy5)
-        self.ui_file_content.setMinimumSize(QSize(0, 0))
+        self.ui_file_content.setMinimumSize(QSize(0, 150))
         self.ui_file_content.setAutoFillBackground(False)
         self.ui_file_content.setMidLineWidth(0)
         self.splitter_left.addWidget(self.ui_file_content)
         self.ui_prop_tab = QTableWidget(self.splitter_left)
         self.ui_prop_tab.setObjectName(u"ui_prop_tab")
-        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         sizePolicy6.setHorizontalStretch(0)
         sizePolicy6.setVerticalStretch(3)
         sizePolicy6.setHeightForWidth(self.ui_prop_tab.sizePolicy().hasHeightForWidth())
         self.ui_prop_tab.setSizePolicy(sizePolicy6)
-        self.ui_prop_tab.setMinimumSize(QSize(0, 0))
+        self.ui_prop_tab.setMinimumSize(QSize(0, 150))
         self.splitter_left.addWidget(self.ui_prop_tab)
         self.widget_2 = QWidget(self.splitter_left)
         self.widget_2.setObjectName(u"widget_2")
@@ -203,14 +203,30 @@ class Ui_TDMSViewer(object):
         self.splitter_right.setOrientation(Qt.Vertical)
         self.splitter_right.setHandleWidth(2)
         self.splitter_right.setChildrenCollapsible(False)
-        self.ui_graph = QChartView(self.splitter_right)
-        self.ui_graph.setObjectName(u"ui_graph")
-        sizePolicy5.setHeightForWidth(self.ui_graph.sizePolicy().hasHeightForWidth())
-        self.ui_graph.setSizePolicy(sizePolicy5)
-        self.ui_graph.setMinimumSize(QSize(0, 0))
-        self.splitter_right.addWidget(self.ui_graph)
+        self.widget_4 = QWidget(self.splitter_right)
+        self.widget_4.setObjectName(u"widget_4")
+        sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy9.setHorizontalStretch(0)
+        sizePolicy9.setVerticalStretch(5)
+        sizePolicy9.setHeightForWidth(self.widget_4.sizePolicy().hasHeightForWidth())
+        self.widget_4.setSizePolicy(sizePolicy9)
+        self.widget_4.setMinimumSize(QSize(0, 200))
+        self.gridLayout_6 = QGridLayout(self.widget_4)
+        self.gridLayout_6.setObjectName(u"gridLayout_6")
+        self.gridLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_4 = QVBoxLayout()
+        self.verticalLayout_4.setSpacing(2)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setSizeConstraint(QLayout.SetDefaultConstraint)
+
+        self.gridLayout_6.addLayout(self.verticalLayout_4, 0, 0, 1, 1)
+
+        self.splitter_right.addWidget(self.widget_4)
         self.widget_3 = QWidget(self.splitter_right)
         self.widget_3.setObjectName(u"widget_3")
+        sizePolicy9.setHeightForWidth(self.widget_3.sizePolicy().hasHeightForWidth())
+        self.widget_3.setSizePolicy(sizePolicy9)
+        self.widget_3.setMinimumSize(QSize(0, 200))
         self.gridLayout_4 = QGridLayout(self.widget_3)
         self.gridLayout_4.setObjectName(u"gridLayout_4")
         self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
@@ -218,11 +234,11 @@ class Ui_TDMSViewer(object):
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.ui_points_tab = QTableView(self.widget_3)
         self.ui_points_tab.setObjectName(u"ui_points_tab")
-        sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        sizePolicy9.setHorizontalStretch(0)
-        sizePolicy9.setVerticalStretch(4)
-        sizePolicy9.setHeightForWidth(self.ui_points_tab.sizePolicy().hasHeightForWidth())
-        self.ui_points_tab.setSizePolicy(sizePolicy9)
+        sizePolicy10 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        sizePolicy10.setHorizontalStretch(0)
+        sizePolicy10.setVerticalStretch(4)
+        sizePolicy10.setHeightForWidth(self.ui_points_tab.sizePolicy().hasHeightForWidth())
+        self.ui_points_tab.setSizePolicy(sizePolicy10)
         self.ui_points_tab.setMinimumSize(QSize(0, 0))
 
         self.horizontalLayout_2.addWidget(self.ui_points_tab)
