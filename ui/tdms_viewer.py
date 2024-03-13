@@ -16,11 +16,12 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QCheckBox, QGridLayout, QHBoxLayout,
-    QHeaderView, QLabel, QLayout, QPlainTextEdit,
-    QPushButton, QScrollBar, QSizePolicy, QSpacerItem,
-    QSpinBox, QSplitter, QTableView, QTableWidget,
-    QTableWidgetItem, QTreeWidget, QTreeWidgetItem, QVBoxLayout,
-    QWidget)
+    QHeaderView, QLabel, QPlainTextEdit, QPushButton,
+    QScrollBar, QSizePolicy, QSpacerItem, QSpinBox,
+    QSplitter, QTableView, QTableWidget, QTableWidgetItem,
+    QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
+
+from pyqtgraph import PlotWidget
 import ui.resource_rc
 
 class Ui_TDMSViewer(object):
@@ -203,25 +204,18 @@ class Ui_TDMSViewer(object):
         self.splitter_right.setOrientation(Qt.Vertical)
         self.splitter_right.setHandleWidth(2)
         self.splitter_right.setChildrenCollapsible(False)
-        self.widget_4 = QWidget(self.splitter_right)
-        self.widget_4.setObjectName(u"widget_4")
+        self.ui_chart = PlotWidget(self.splitter_right)
+        self.ui_chart.setObjectName(u"ui_chart")
         sizePolicy9 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         sizePolicy9.setHorizontalStretch(0)
         sizePolicy9.setVerticalStretch(5)
-        sizePolicy9.setHeightForWidth(self.widget_4.sizePolicy().hasHeightForWidth())
-        self.widget_4.setSizePolicy(sizePolicy9)
-        self.widget_4.setMinimumSize(QSize(0, 200))
-        self.gridLayout_6 = QGridLayout(self.widget_4)
+        sizePolicy9.setHeightForWidth(self.ui_chart.sizePolicy().hasHeightForWidth())
+        self.ui_chart.setSizePolicy(sizePolicy9)
+        self.ui_chart.setMinimumSize(QSize(0, 300))
+        self.gridLayout_6 = QGridLayout(self.ui_chart)
         self.gridLayout_6.setObjectName(u"gridLayout_6")
         self.gridLayout_6.setContentsMargins(0, 0, 0, 0)
-        self.verticalLayout_4 = QVBoxLayout()
-        self.verticalLayout_4.setSpacing(2)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setSizeConstraint(QLayout.SetDefaultConstraint)
-
-        self.gridLayout_6.addLayout(self.verticalLayout_4, 0, 0, 1, 1)
-
-        self.splitter_right.addWidget(self.widget_4)
+        self.splitter_right.addWidget(self.ui_chart)
         self.widget_3 = QWidget(self.splitter_right)
         self.widget_3.setObjectName(u"widget_3")
         sizePolicy9.setHeightForWidth(self.widget_3.sizePolicy().hasHeightForWidth())
@@ -231,14 +225,12 @@ class Ui_TDMSViewer(object):
         self.gridLayout_4.setObjectName(u"gridLayout_4")
         self.gridLayout_4.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setSpacing(2)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.ui_points_tab = QTableView(self.widget_3)
         self.ui_points_tab.setObjectName(u"ui_points_tab")
-        sizePolicy10 = QSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
-        sizePolicy10.setHorizontalStretch(0)
-        sizePolicy10.setVerticalStretch(4)
-        sizePolicy10.setHeightForWidth(self.ui_points_tab.sizePolicy().hasHeightForWidth())
-        self.ui_points_tab.setSizePolicy(sizePolicy10)
+        sizePolicy4.setHeightForWidth(self.ui_points_tab.sizePolicy().hasHeightForWidth())
+        self.ui_points_tab.setSizePolicy(sizePolicy4)
         self.ui_points_tab.setMinimumSize(QSize(0, 0))
 
         self.horizontalLayout_2.addWidget(self.ui_points_tab)

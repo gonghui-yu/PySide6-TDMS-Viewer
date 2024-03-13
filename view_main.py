@@ -6,12 +6,6 @@ from PySide6.QtCore import Slot, Signal
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QFont
 from PySide6.QtWidgets import QWidget, QFileDialog, QTreeWidgetItem, QHeaderView, QAbstractItemView, QTableWidgetItem
 from PySide6.QtCore import Qt
-import matplotlib.dates as md
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, \
-    NavigationToolbar2QT as NavigationToolbar
-from matplotlib.figure import Figure
-import matplotlib.pyplot as plt
 
 from ui.tdms_viewer import Ui_TDMSViewer
 from model_tdms import ModelTDMS
@@ -125,18 +119,9 @@ class ViewMain(QWidget, Ui_TDMSViewer):
         self.points_tab_model.setVerticalHeaderLabels(["" for i in range(self.points_tab_model.rowCount())])
 
     def init_chart(self):
-        self.figure = Figure(tight_layout=True)  # tight_layout，是否根据layout大小自动调整图像大小
-        self.canvas = FigureCanvas(self.figure)  # 创建画布
-        self.axes = self.figure.add_subplot()  # 创建曲线，返回坐标轴
-        toolbar = NavigationToolbar(self.canvas, self)  # 创建波形图工具栏
-
-        self.verticalLayout_4.addWidget(toolbar)
-        self.verticalLayout_4.addWidget(self.canvas)
-
-        self.axes.grid(linestyle="--")
-
-        plt.rcParams['font.sans-serif'] = ['SimHei']  # 指定默认字体，解决中文乱码问题
-        plt.rcParams['axes.unicode_minus'] = False  # 解决保存图像是负号'-'显示为方块的问题
+        self.ui_chart.setAntialiasing(True)  # 设置抗锯齿
+        self.ui_chart.setBackground("white")  # 设置背景色
+        self.ui_chart.showGrid(x=True, y=True, alpha=0.5)  # 设置显示网格线，alpha为线不透明度（0.0~1.0）
 
     def init_model_tdms(self):
         self.signal_read_file_content.connect(self.model_tdms.slot_read_file_content)
@@ -332,31 +317,17 @@ class ViewMain(QWidget, Ui_TDMSViewer):
             #             "y": [float]
             #         }]
             #     """
-        self.axes.cla()
+        self.ui_chart.clear()
 
-        # 只要有一个通道没有时间戳，就使用数字X轴
-        is_x_value = False
-        for channel in points:
-            if channel["t0"] is None:
-                is_x_value = True
-                break
-
-        for channel in points:
-            # 创建X轴
-            if is_x_value is True:  # 创建数字X轴
-                x_value = list(range(1, len(channel["y"] + 1)))
-                self.axes.xaxis.set_major_formatter(md.F)
+        for channel_data in points:
+            x_data = []
+            if channel_data["t0"] is None:
+                data_length = len(channel_data["y"])
+                x_data = numpy.linspace(1, data_length, data_length)
             else:
-                min_time = channel["t0"].timestamp()  # 将开始时间转换为float时间
-                max_time = min_time + channel["dt"] * (len(channel["y"] - 1))  # 计算获得float结束时间
-                x_value = numpy.linspace(min_time, max_time, len(channel["y"]))  # 生成float时间列表
-                x_value = [datetime.datetime.fromtimestamp(Ttime) for Ttime in x_value]   # 将float时间列表转换为datetime时间列表
-                self.axes.xaxis.set_major_formatter(md.DateFormatter("%H:%M:%S.%f \n %Y-%m-%d"))  # 设置X轴时间显示格式
-                self.axes.xaxis.set_major_locator(md.AutoDateLocator())  # 设置X轴时间标签位置自适应，防止重叠
+                data_length = len(channel_data["y"])
+                x_data = numpy.linspace(1, data_length, data_length)
+            line_name = channel_data["group_name"] + "->" + channel_data["channel_name"]
+            self.ui_chart.plot(x_data, channel_data["y"], name=line_name)
+            self.ui_chart.addLegend((1, 1))
 
-            # 赋值画图
-            self.axes.plot(x_value, channel["y"], label=channel["group_name"] + ":" + channel["channel_name"])  # 耗时
-
-        self.axes.legend(loc=1)  # 在右上角显示图例
-        self.axes.grid(linestyle="--")  # 以虚线显示网格
-        self.canvas.draw()  # 画图刷新
